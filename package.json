@@ -1,0 +1,15 @@
+{
+  "name": "graphql-auth-example",
+  "version": "1.0.0",
+  "description": "Example apollo-server for auth in graphql using schema directives.",
+  "main": "index.js",
+  "author": "James Henshaw",
+  "license": "MIT",
+  "dependencies": {
+    "apollo-server": "^2.1.0",
+    "graphql": "^14.0.2"
+  },
+  "scripts": {
+    "start": "node index.js"
+  }
+}
