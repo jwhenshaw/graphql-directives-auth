@@ -1,5 +1,6 @@
 const { ApolloServer, gql, makeExecutableSchema } = require('apollo-server');
 const AuthDirective = require('./AuthDirective');
+const queryResolvers = require('./resolvers');
 
 const typeDefs = gql`
   directive @auth(requires: Role = ADMIN) on OBJECT | FIELD_DEFINITION
@@ -20,9 +21,7 @@ const typeDefs = gql`
 `;
 
 const resolvers = {
-  Query: {
-    users: () => [{ name: 'Dummy user', banned: false }],
-  },
+  Query: queryResolvers,
 };
 
 const schema = makeExecutableSchema({

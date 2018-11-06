@@ -50,7 +50,6 @@ class AuthDirective extends SchemaDirectiveVisitor {
     if (!strategyResult) {
       throw new Error('not authorized');
     }
-    return false;
   }
 }
 
