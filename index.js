@@ -36,6 +36,8 @@ const schema = makeExecutableSchema({
 const server = new ApolloServer({
   context: ({ req }) => ({ headers: req.headers }),
   schema,
+  introspection: true,
+  playground: true,
 });
 
 server.listen().then(({ url }) => {
