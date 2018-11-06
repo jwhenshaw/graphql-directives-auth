@@ -36,21 +36,22 @@ class AuthDirective extends SchemaDirectiveVisitor {
           throw new Error('not authorized');
         }
 
-        const context = args[2];
-        await this.executeStrategy(requiredRole, context);
+        const requestData = args[2];
+        await this.executeStrategy(requiredRole, requestData);
 
         return resolve.apply(this, args);
       }.bind(this);
     });
   }
 
-  async executeStrategy(role, context) {
-    const strategyResult = await strategies[role.toLowerCase()](context);
+  async executeStrategy(role, requestData) {
+    const strategyResult = await strategies[role.toLowerCase()](requestData);
 
     if (!strategyResult) {
       throw new Error('not authorized');
     }
-  };
+    return false;
+  }
 }
 
 module.exports = AuthDirective;
