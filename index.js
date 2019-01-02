@@ -1,42 +1,53 @@
-const { ApolloServer, gql, makeExecutableSchema } = require('apollo-server');
-const AuthDirective = require('./AuthDirective');
-const queryResolvers = require('./resolvers');
+const { ApolloServer, gql, makeExecutableSchema } = require("apollo-server");
+const ObjectAuthDirective = require("./ObjectAuthDirective");
+const FieldAuthDirective = require("./FieldAuthDirective");
+const { mutationResolvers, queryResolvers } = require("./resolvers");
 
 const typeDefs = gql`
-  directive @auth(requires: Role = ADMIN) on OBJECT | FIELD_DEFINITION
+  directive @objectAuth(requires: Role = ADMIN) on OBJECT
+  directive @fieldAuth(requires: Role = ADMIN) on FIELD_DEFINITION
 
   enum Role {
     ADMIN
     USER
   }
 
-  type User @auth(requires: USER) {
+  type User @objectAuth(requires: USER) {
     name: String
-    banned: Boolean @auth(requires: ADMIN)
+    username: String
+    banned: Boolean @fieldAuth(requires: ADMIN)
   }
 
   type Query {
-    users: [User]
+    user: User
+    users: [User] @fieldAuth(requires: ADMIN)
+  }
+
+  type Mutation {
+    signUp(username: String, name: String): User!
+    editUser(username: String, name: String): User! @fieldAuth(requires: USER)
   }
 `;
 
 const resolvers = {
   Query: queryResolvers,
+  Mutation: mutationResolvers
 };
 
 const schema = makeExecutableSchema({
   typeDefs,
   resolvers,
   schemaDirectives: {
-    auth: AuthDirective,
-  },
+    objectAuth: ObjectAuthDirective,
+    fieldAuth: FieldAuthDirective
+  }
 });
 
 const server = new ApolloServer({
   context: ({ req }) => ({ headers: req.headers }),
   schema,
   introspection: true,
-  playground: true,
+  playground: true
 });
 
 server.listen().then(({ url }) => {

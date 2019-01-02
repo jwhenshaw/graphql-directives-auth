@@ -1,18 +1,12 @@
-const { SchemaDirectiveVisitor } = require('apollo-server');
-const { defaultFieldResolver } = require('graphql');
-const strategies = require('./strategies');
+const { SchemaDirectiveVisitor } = require("apollo-server");
+const { defaultFieldResolver } = require("graphql");
+const strategies = require("./strategies");
 
-class AuthDirective extends SchemaDirectiveVisitor {
+class ObjectAuthDirective extends SchemaDirectiveVisitor {
   visitObject(type) {
+    console.log("ObjectAuthDirective:visitObject", { type });
     this.ensureFieldsWrapped(type);
     type._requiredAuthRole = this.args.requires;
-  }
-  // Visitor methods for nested types like fields and arguments
-  // also receive a details object that provides information about
-  // the parent and grandparent types.
-  visitFieldDefinition(field, details) {
-    this.ensureFieldsWrapped(details.objectType);
-    field._requiredAuthRole = this.args.requires;
   }
 
   ensureFieldsWrapped(objectType) {
@@ -21,6 +15,10 @@ class AuthDirective extends SchemaDirectiveVisitor {
     objectType._authFieldsWrapped = true;
 
     const fields = objectType.getFields();
+    console.log("ObjectAuthDirective:ensureFieldsWrapped", {
+      objectType,
+      fields
+    });
 
     Object.keys(fields).forEach(fieldName => {
       const field = fields[fieldName];
@@ -33,7 +31,7 @@ class AuthDirective extends SchemaDirectiveVisitor {
 
         if (!requiredRole) {
           // Let's be on the safe side
-          throw new Error('not authorized');
+          throw new Error("not authorized");
         }
 
         const requestData = args[2];
@@ -48,9 +46,9 @@ class AuthDirective extends SchemaDirectiveVisitor {
     const strategyResult = await strategies[role.toLowerCase()](requestData);
 
     if (!strategyResult) {
-      throw new Error('not authorized');
+      throw new Error("not authorized");
     }
   }
 }
 
-module.exports = AuthDirective;
+module.exports = ObjectAuthDirective;
